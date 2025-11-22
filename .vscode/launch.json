@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/levgerasimov/Projects/practice3.2_pks",
+      "program": "/Users/levgerasimov/Projects/practice3.2_pks/build/Debug/outDebug"
+    }
+  ]
+}

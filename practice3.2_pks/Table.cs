@@ -11,7 +11,7 @@ namespace practice3._2_pks
                 Console.WriteLine("1 - Добавить стол");
                 Console.WriteLine("2 - Вывести информацию о столе");
                 Console.WriteLine("3 - Изменения информации стола");
-                Console.WriteLine("4 - Вывод перечня всех доступных для бронирования столов");
+                Console.WriteLine("4 - Вывод перечня всех доступных для бронирования столов по фильтру");
                 Console.WriteLine("5 - Вернуться в главное меню");
                 Console.WriteLine("6 - Выход");
 
@@ -49,22 +49,23 @@ namespace practice3._2_pks
         public string location { get; set; }
         public int seats_count { get; set; }
         public Dictionary<string, string> timetable = new Dictionary<string, string>()
-    {
-        {"9.00-10.00", null},
-        {"10.00-11.00", null},
-        {"11.00-12.00", null},
-        {"12.00-13.00", null},
-        {"13.00-14.00", null},
-        {"14.00-15.00", null},
-        {"15.00-16.00", null},
-        {"16.00-17.00", null},
-        {"17.00-18.00", null},
-        {"18.00-19.00", null},
-    };
+        {
+            {"9.00-10.00", null},
+            {"10.00-11.00", null},
+            {"11.00-12.00", null},
+            {"12.00-13.00", null},
+            {"13.00-14.00", null},
+            {"14.00-15.00", null},
+            {"15.00-16.00", null},
+            {"16.00-17.00", null},
+            {"17.00-18.00", null},
+            {"18.00-19.00", null},
+        };
+
+       
+
 
         public static List<Table> table_list = new List<Table>();
-
-
 
         public Table(int id, string location, int seats_count)
         {
@@ -174,18 +175,18 @@ namespace practice3._2_pks
                 case "1":
                     Console.WriteLine("Введите новый id: ");
                     int new_id = MainProgram.checking_int_number();
+                    bool check_table_id = true;
                     foreach (Table table in table_list)
                     {
                         if (new_id == table.id)
                         {
+                            check_table_id = false;
                             Console.WriteLine($"Стол с id - {new_id}, уже существует. Ошибка!");
-                            break;
                         }
-                        else
-                        {
-                            found_table.id = new_id;
-                            break;
-                        }
+                    }
+                    if (check_table_id == true)
+                    {
+                        found_table.id = new_id;   
                     }
                     break;
                 case "2":
@@ -195,7 +196,7 @@ namespace practice3._2_pks
                     {
                         table_location_choice = Console.ReadLine();
 
-                        switch (table_location_choice) // ЭТО ГОВНО БАГУЕТ КАК СУКА, ПРИ ВВОДЕ ОДНОГО НЕВЕРНОГО, ВСЁ ЛОМАЕТСЯ
+                        switch (table_location_choice)
                         {
                             case "1":
                                 found_table.location = "у окна";
@@ -244,28 +245,62 @@ namespace practice3._2_pks
             Console.WriteLine("Введите id стола, информацию о котором хотите вывести");
             int id = MainProgram.checking_int_number();
 
+            Table found_table = null;
+
             foreach (Table table in table_list)
             {
                 if (id == table.id)
                 {
-                    Console.WriteLine($"ID:================= {table.id}");
-                    Console.WriteLine($"Расположение:======= {table.location}");
-                    Console.WriteLine($"Количество мест:==== {table.seats_count}");
-                    Console.WriteLine("Расписание:");
-                    foreach (var time_slot in table.timetable)
+                    found_table = table;
+                    break;
+                }
+            }
+
+            if (found_table == null)
+            {
+                Console.WriteLine("Нет стола с таким id!");
+                return;
+            }
+
+            Console.WriteLine($"ID:================= {found_table.id}");
+            Console.WriteLine($"Расположение:======= {found_table.location}");
+            Console.WriteLine($"Количество мест:==== {found_table.seats_count}");
+            Console.WriteLine("Расписание:");
+
+            foreach (var time_slot in found_table.timetable)
+            {
+                string status;
+                if (time_slot.Value == null)
+                {
+                    status = "Свободно";
+                }
+                else
+                {
+                    string[] reservation_data = time_slot.Value.Split(';');
+                    string res_id = reservation_data[0];
+
+                    Reservation reservation = Reservation.reservation_list.Find(r => r.id.ToString() == res_id);
+
+                    if (reservation != null)
                     {
-                        string status;
-                        if (time_slot.Value == null)
+                        string reservation_end = reservation.end_reservation;
+                        string slot_start = time_slot.Key.Split('-')[0];
+
+                        if (slot_start == reservation_end)
                         {
-                            status = "Свободно";
+                            status = "Буфер (уборка)";
                         }
                         else
                         {
-                            status = "Занято: " + time_slot.Value;
+                            status = $"Занято: {reservation.name}";
                         }
-                        Console.WriteLine($"  {time_slot.Key}: {status}");
+                    }
+                    else
+                    {
+                        status = "Занято (бронь не найдена)";
                     }
                 }
+                Console.WriteLine($"  {time_slot.Key}: {status}");
             }
         }
 
@@ -313,8 +348,6 @@ namespace practice3._2_pks
             int start_hour = 0;
             int end_hour = 0;
 
-            /// ПРОВЕРКА ВРЕМЕНИ
-
             Console.WriteLine("Время брони с: \nВведите целое число от 9 до 18");
             start_hour = MainProgram.checking_start_hour();
 
@@ -323,6 +356,8 @@ namespace practice3._2_pks
 
             bool found_any_table = false;
 
+
+
             foreach (Table table in table_list)
             {
 
@@ -330,7 +365,7 @@ namespace practice3._2_pks
                 {
                     string real_hour = "";
                     bool table_free = true;
-                    for (int hour = start_hour; hour < end_hour; hour++)
+                    for (int hour = start_hour; hour < end_hour + 1; hour++)
                     {
                         real_hour = hour.ToString() + ".00-" + (hour + 1).ToString() + ".00";
                         if (table.timetable[real_hour] != null)
@@ -363,6 +398,8 @@ namespace practice3._2_pks
                     }
                 }
             }
+
+
             if (!found_any_table)
             {
                 Console.WriteLine("К сожалению столов по данным фильтрам нет");
@@ -381,11 +418,11 @@ namespace practice3._2_pks
 
             foreach (Table table in table_list)
             {
-                if (filter_seats_count == table.seats_count)
+                if (filter_seats_count <= table.seats_count)
                 {
                     string real_hour = "";
                     bool table_free = true;
-                    for (int hour = start_hour; hour < end_hour; hour++)
+                    for (int hour = start_hour; hour < end_hour + 1; hour++)
                     {
                         real_hour = hour.ToString() + ".00-" + (hour + 1).ToString() + ".00";
                         if (table.timetable[real_hour] != null)
@@ -412,19 +449,23 @@ namespace practice3._2_pks
                 return null;
             }
 
-            Console.WriteLine("\nВыберите ID стола для бронирования:");
-            int chosen_table_id = MainProgram.checking_int_number();
+            while (true)
+            {
+                Console.WriteLine("\nВыберите ID стола для бронирования:");
+                int chosen_table_id = MainProgram.checking_int_number();
 
-            Table selected_table = available_tables.Find(t => t.id == chosen_table_id);
-            if (selected_table != null)
-            {
-                return selected_table;
+                Table selected_table = available_tables.Find(t => t.id == chosen_table_id);
+                if (selected_table != null)
+                {
+                    return selected_table;
+                }
+                else
+                {
+
+                    Console.WriteLine("Ошибка! Стол с таким ID не найден в списке доступных.");
+                }
             }
-            else
-            {
-                Console.WriteLine("Ошибка! Стол с таким ID не найден в списке доступных.");
-                return null;
-            }
+            
         }
     }
 }

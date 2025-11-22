@@ -57,11 +57,11 @@
         {
             while (true)
             {
-                if (int.TryParse(Console.ReadLine(), out int hour) && hour >= 9 && hour <= 18)
+                if (int.TryParse(Console.ReadLine(), out int hour) && hour >= 9 && hour <= 17)
                 {
                     return hour;
                 }
-                Console.WriteLine("Ошибка! Введите целое число от 9 до 18:");
+                Console.WriteLine("Ошибка! Введите целое число от 9 до 17:");
             }
         }
 
@@ -69,11 +69,12 @@
         {
             while (true)
             {
-                if (int.TryParse(Console.ReadLine(), out int hour) && hour >= startHour + 1 && hour <= 19)
+                if (int.TryParse(Console.ReadLine(), out int hour) && hour >= startHour + 1 && hour <= 18)
                 {
                     return hour;
                 }
-                Console.WriteLine($"Ошибка! Введите целое число от {startHour + 1} до 19:");
+
+                Console.WriteLine($"Ошибка! Введите целое число от {startHour + 1} до 18:");
             }
         }
 
