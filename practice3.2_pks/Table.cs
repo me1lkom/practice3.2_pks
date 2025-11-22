@@ -292,7 +292,7 @@ namespace practice3._2_pks
                         }
                         else
                         {
-                            status = $"Занято: {reservation.name}";
+                            status = $"Занято: ID {reservation.id}, {reservation.name}, {reservation.phone}, {reservation.comment}";
                         }
                     }
                     else

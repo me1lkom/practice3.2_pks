@@ -130,7 +130,6 @@ namespace practice3._2_pks
             {
                 string slot = $"{hour}.00-{hour + 1}.00";
                 selected_table.timetable[slot] = $"{newReservation.id};{newReservation.name};{newReservation.phone};{newReservation.comment}";
-                Console.WriteLine("Данные успешно добавлены"); // отладка
             }
 
 
@@ -489,7 +488,6 @@ namespace practice3._2_pks
             Console.WriteLine("=====================");
 
             id_to_remove = reservation.id;
-            Console.WriteLine("Всё время стерто"); // отдалка
 
             if (id_to_remove != 0)
             {
